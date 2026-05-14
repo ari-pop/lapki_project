@@ -1,0 +1,25 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}Вход и регистрация{% endblock %}
+
+{% block content %}
+<section class="page-section auth-page">
+    <h1>Вход и регистрация</h1>
+    <p class="auth-intro">
+        Войдите в аккаунт или зарегистрируйтесь, чтобы сохранять анкеты подбора и отслеживать свои заявки на усыновление.
+    </p>
+
+    <div class="auth-cards auth-cards-single">
+        <article class="auth-card">
+            <h2>Будущий хозяин</h2>
+            <p>Создайте аккаунт, чтобы хранить свои заявки, анкеты и быстрее возвращаться к подходящим питомцам.</p>
+            <a href="{% url 'register' %}" class="btn">Зарегистрироваться</a>
+        </article>
+    </div>
+
+    <div class="auth-login-link">
+        <p>Уже есть аккаунт?</p>
+        <a href="{% url 'login' %}" class="btn">Войти</a>
+    </div>
+</section>
+{% endblock %}

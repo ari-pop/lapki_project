@@ -1,0 +1,36 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'dashboard' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Все обращения с сайта собраны в одном месте, чтобы ничего не потерялось.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right"></div>
+    </div>
+
+    <div class="admin-table-card admin-table-card-centered">
+        <div class="admin-record-grid">
+            {% for item in feedback_items %}
+                <article class="admin-record admin-record-no-thumb admin-record--stacked">
+                    <div class="admin-record__main">
+                        <h2>{{ item.name }}</h2>
+                        <p>{{ item.email }}</p>
+                        <p>{{ item.message }}</p>
+                        <small>{{ item.submitted_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                </article>
+            {% empty %}
+                <p>Сообщений пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

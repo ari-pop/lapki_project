@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Lapki Shelter{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'shelter/css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+<header class="site-header">
+    <div class="header-container">
+        <div class="logo-title">
+            <img src="{% static 'shelter/img/logo.png' %}" alt="Логотип Лапки" class="logo">
+            <div class="branding">
+                <div class="site-title">Приют «Лапки»</div>
+                <div class="tagline">Дом, где ждут и любят</div>
+            </div>
+        </div>
+
+        <button type="button" id="nav-toggle" class="nav-toggle" aria-label="Открыть меню" aria-expanded="false" aria-controls="main-nav">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <nav class="main-nav" id="main-nav">
+            <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <i class="fas fa-paw"></i> Главная
+            </a>
+            <a href="{% url 'pets' %}" class="{% if request.resolver_match.url_name == 'pets' %}active{% endif %}">
+                <i class="fas fa-dog"></i> Питомцы
+            </a>
+            <a href="{% url 'owner_questionnaire' %}" class="{% if request.resolver_match.url_name == 'owner_questionnaire' %}active{% endif %}">
+                <i class="fas fa-heart"></i> Подбор
+            </a>
+            <a href="{% url 'about' %}" class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">
+                <i class="fas fa-info-circle"></i> О приюте
+            </a>
+            <a href="{% url 'news' %}" class="{% if request.resolver_match.url_name == 'news' %}active{% endif %}">
+                <i class="fas fa-newspaper"></i> Новости
+            </a>
+            <a href="{% url 'help' %}" class="{% if request.resolver_match.url_name == 'help' %}active{% endif %}">
+                <i class="fas fa-hands-helping"></i> Помощь
+            </a>
+        </nav>
+
+        <div class="header-actions">
+            <button type="button" id="theme-toggle" class="theme-toggle theme-toggle-compact" aria-label="Переключить тему" title="Сменить тему">
+                <i class="fas fa-moon"></i>
+            </button>
+
+            {% if request.user.is_authenticated %}
+                {% if request.user.is_superuser or request.user.is_staff %}
+                    <a href="{% url 'dashboard' %}" class="donate-btn compact-btn">Админ</a>
+                {% else %}
+                    <a href="{% url 'dashboard' %}" class="donate-btn compact-btn">Кабинет</a>
+                {% endif %}
+
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="header-link header-link-button">Выйти</button>
+                </form>
+            {% else %}
+                <a href="{% url 'account_home' %}" class="donate-btn compact-btn">Вход</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main>
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+</main>
+
+<footer>
+    <div class="footer-content">
+        <p><strong>Приют «Лапки»</strong></p>
+        <p>г. Таганрог, ул. Добрая, 15</p>
+        <p>Телефон: +7 (863) 400-00-00</p>
+        <p>Email: info@lapki_shelter.ru</p>
+        <p>
+            <a href="http://vk.com/" target="_blank" rel="noopener noreferrer">ВКонтакте</a> |
+            <a href="https://max.ru/" target="_blank" rel="noopener noreferrer">Max</a>
+        </p>
+        <p>&copy; 2026 Lapki Shelter. Все права защищены.</p>
+    </div>
+</footer>
+
+<script>
+  (function () {
+    const storageKey = 'lapki-theme';
+    const body = document.body;
+    const button = document.getElementById('theme-toggle');
+    const navToggle = document.getElementById('nav-toggle');
+    const nav = document.getElementById('main-nav');
+
+    function applyTheme(theme) {
+      const isDark = theme === 'dark';
+      body.classList.toggle('theme-dark', isDark);
+      if (!button) return;
+
+      const icon = button.querySelector('i');
+      if (icon) {
+        icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+      }
+      button.title = isDark ? 'Светлая тема' : 'Тёмная тема';
+      button.setAttribute('aria-label', isDark ? 'Включить светлую тему' : 'Включить тёмную тему');
+    }
+
+    applyTheme(localStorage.getItem(storageKey) === 'dark' ? 'dark' : 'light');
+
+    if (button) {
+      button.addEventListener('click', function () {
+        const nextTheme = body.classList.contains('theme-dark') ? 'light' : 'dark';
+        localStorage.setItem(storageKey, nextTheme);
+        applyTheme(nextTheme);
+      });
+    }
+
+    if (navToggle && nav) {
+      navToggle.addEventListener('click', function () {
+        const isOpen = nav.classList.toggle('is-open');
+        navToggle.classList.toggle('is-open', isOpen);
+        navToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        navToggle.setAttribute('aria-label', isOpen ? 'Закрыть меню' : 'Открыть меню');
+      });
+
+      nav.querySelectorAll('a').forEach(function (link) {
+        link.addEventListener('click', function () {
+          nav.classList.remove('is-open');
+          navToggle.classList.remove('is-open');
+          navToggle.setAttribute('aria-expanded', 'false');
+          navToggle.setAttribute('aria-label', 'Открыть меню');
+        });
+      });
+    }
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+{% extends "shelter/base.html" %}
+{% load static %}
+
+{% block title %}Главная - Приют «Лапки»{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+    <div class="welcome-text">
+        <h1>Добро пожаловать в приют «Лапки» <img src="{% static 'shelter/img/paw.svg' %}" alt="Лапка" class="paw-icon" /></h1>
+        <p>Здесь каждый хвостик обретает надежду и любовь. Мы заботимся о наших питомцах и ищем для них самые добрые руки.</p>
+        <a href="{% url 'pets' %}" class="btn">Посмотреть питомцев</a>
+        <a href="{% url 'owner_questionnaire' %}" class="btn" style="margin-left: 10px;">Подобрать питомца</a>
+    </div>
+</div>
+
+<div class="features">
+    <div class="feature">
+        <h3>Забота и внимание</h3>
+        <p>Наши животные получают питание, лечение и любовь каждый день.</p>
+    </div>
+    <div class="feature">
+        <h3>Поиск дома</h3>
+        <p>Мы подбираем ответственные семьи для наших подопечных.</p>
+    </div>
+    <div class="feature">
+        <h3>Как помочь?</h3>
+        <p>Станьте волонтёром, принесите корм или поддержите нас финансово.</p>
+    </div>
+</div>
+
+<section class="stats-section">
+    <h2>Немного о нашей работе</h2>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>{{ total_pets }}</h3>
+            <p>Всего питомцев</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ available_pets }}</h3>
+            <p>Ищут дом</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ adopted_pets }}</h3>
+            <p>Уже дома</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ applications_count }}</h3>
+            <p>Заявок на усыновление</p>
+        </div>
+
+        <div class="stat-card">
+            <h3>{{ questionnaires_count }}</h3>
+            <p>Заполнено анкет</p>
+        </div>
+    </div>
+</section>
+
+<section class="happy-stories">
+    <h2>Счастливые истории</h2>
+
+    <div class="stories-grid">
+        {% for pet in happy_stories %}
+        <article class="story-card">
+            <div class="story-image">
+                {% if pet.image %}
+                    <img src="{{ pet.image.url }}" alt="{{ pet.name }}">
+                {% else %}
+                    <div class="image-placeholder">Нет фото</div>
+                {% endif %}
+            </div>
+
+            <div class="story-content">
+                <h3>{{ pet.name }}</h3>
+                <p class="story-badge">
+                    {% if pet.gender == 'female' %}Нашла дом ❤️{% else %}Нашёл дом ❤️{% endif %}
+                </p>
+                {% if pet.description %}
+                    <p>{{ pet.description|truncatewords:18 }}</p>
+                {% else %}
+                    <p>Теперь у {{ pet.name }} есть любящая семья и новый дом.</p>
+                {% endif %}
+            </div>
+        </article>
+        {% empty %}
+        <p class="results-intro">Скоро здесь появятся первые счастливые истории наших питомцев.</p>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="latest-news">
+    <h2>Последние новости</h2>
+
+    <div class="news-grid">
+        {% for news in latest_news %}
+        <div class="news-card">
+            <div class="news-image-wrapper">
+                {% if news.image %}
+                    <img src="{{ news.image.url }}" alt="{{ news.title }}">
+                {% else %}
+                    <div class="image-placeholder">Нет фото</div>
+                {% endif %}
+            </div>
+
+            <div class="news-content">
+                <h3>
+                    <a href="{% url 'news_detail' news.pk %}">
+                        {{ news.title }}
+                    </a>
+                </h3>
+
+                <p>{{ news.summary|truncatewords:20 }}</p>
+                <small>{{ news.date }}</small>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

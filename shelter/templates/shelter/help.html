@@ -1,0 +1,54 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Как помочь — Lapki Shelter{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>
+        Как помочь приюту
+        <img src="{% static 'shelter/img/help.png' %}" alt="Рука и лапка" class="logotip">
+    </h1>
+
+    <p style="text-align: center;">
+        Каждый может помочь нашим питомцам обрести заботу, здоровье и новый дом.
+    </p>
+
+    <div class="help-block">
+        <h2>Чем можно помочь?</h2>
+        <ul class="help-list">
+            <li>стать волонтёром и помогать в уходе за животными;</li>
+            <li>передать корм, лекарства, игрушки и другие нужные вещи;</li>
+            <li>поддержать приют финансово;</li>
+            <li>рассказать о наших питомцах друзьям и знакомым;</li>
+            <li>помочь в поиске новых хозяев для животных.</li>
+        </ul>
+    </div>
+
+    <div class="help-block help-contacts">
+        <h2>Контакты приюта</h2>
+        <p><strong>Адрес:</strong> г. Таганрог, ул. Добрая, 15</p>
+        <p><strong>Телефон:</strong> +7 (863) 400-00-00</p>
+        <p><strong>Email:</strong> info@lapki_shelter.ru</p>
+        <p><strong>Время работы:</strong> Пн–Вс 9:00–18:00</p>
+    </div>
+
+    <div class="help-block" id="contact-form">
+        <h2>Свяжитесь с нами</h2>
+
+        <form method="post" action="{% url 'help' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn">Отправить</button>
+        </form>
+    </div>
+
+    <div class="help-block">
+        <h2>Мы в соцсетях</h2>
+        <div class="social-links">
+            <a href="http://vk.com/" target="_blank" class="btn">ВКонтакте</a>
+            <a href="https://max.ru/" target="_blank" class="btn">Max</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

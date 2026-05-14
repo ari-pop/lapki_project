@@ -1,0 +1,49 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'dashboard' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Меняйте статусы заявок и открывайте полную карточку обращения в один клик.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right"></div>
+    </div>
+
+    <div class="admin-table-card admin-table-card-centered">
+        <div class="admin-record-grid">
+            {% for application in page_obj %}
+                <article class="admin-record admin-record-no-thumb">
+                    <div class="admin-record__main">
+                        <h2>{{ application.full_name }}</h2>
+                        <p>{{ application.pet.name }} • {{ application.get_status_display }}</p>
+                        <p>{{ application.email }} • {{ application.phone }}</p>
+                        <small>{{ application.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    <a href="{% url 'admin_application_edit' application.pk %}" class="btn admin-mini-btn">Открыть</a>
+                </article>
+            {% empty %}
+                <p>Заявок пока нет.</p>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}" class="header-link">Назад</a>
+                {% endif %}
+                <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" class="header-link">Вперёд</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

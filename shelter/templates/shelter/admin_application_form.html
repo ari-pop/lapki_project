@@ -1,0 +1,56 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'admin_application_list' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Здесь можно обновить статус, оставить комментарий и при необходимости скорректировать данные заявки.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right"></div>
+    </div>
+
+    <section class="help-block admin-meta-card">
+        <h2>Кратко по заявке</h2>
+        <div class="admin-meta-grid">
+            <div class="admin-meta-item">
+                <span>Питомец</span>
+                <strong>{{ application.pet.name }}</strong>
+            </div>
+            <div class="admin-meta-item">
+                <span>Пользователь</span>
+                <strong>{{ application.user|default:"не привязан" }}</strong>
+            </div>
+            <div class="admin-meta-item">
+                <span>Дата</span>
+                <strong>{{ application.created_at|date:"d.m.Y H:i" }}</strong>
+            </div>
+            <div class="admin-meta-item">
+                <span>Контакт</span>
+                <strong>{{ application.email }}{% if application.phone %} • {{ application.phone }}{% endif %}</strong>
+            </div>
+        </div>
+    </section>
+
+    <form method="post" class="admin-edit-form">
+        {% csrf_token %}
+        {% for field in form %}
+            <p>
+                {{ field.label_tag }}
+                {{ field }}
+                {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}
+                    <div class="field-error">{{ error }}</div>
+                {% endfor %}
+            </p>
+        {% endfor %}
+        <button type="submit" class="btn">{{ submit_label }}</button>
+    </form>
+</section>
+{% endblock %}

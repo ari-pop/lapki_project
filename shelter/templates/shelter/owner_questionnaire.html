@@ -1,0 +1,380 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Анкета будущего хозяина{% endblock %}
+
+{% block content %}
+<section class="page-section quiz-page">
+    <h1>
+        Тест на подбор питомца
+        <img src="{% static 'shelter/img/contact.png' %}" alt="Котик с карандашиком" class="logotip">
+    </h1>
+
+    <p class="results-intro">
+        Ответьте на несколько простых вопросов, и мы покажем наиболее подходящих питомцев.
+    </p>
+
+    {% if show_saved_questionnaire_prompt %}
+        <div class="form-help-card questionnaire-reuse-card">
+            <strong>У вас уже есть сохранённая анкета.</strong>
+            <p>Хотите немного изменить ответы или сразу посмотреть актуальный подбор?</p>
+            <div class="questionnaire-reuse-actions">
+                <a href="?reuse=1" class="btn">Показать результат</a>
+                <a href="?edit=1" class="header-link questionnaire-reuse-link">Изменить ответы</a>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="quiz-steps" id="quiz-steps"{% if show_saved_questionnaire_prompt %} style="display: none;"{% endif %}>
+        <div class="quiz-step is-active">1. О вас</div>
+        <div class="quiz-step">2. Дом и ритм</div>
+        <div class="quiz-step">3. Идеальный питомец</div>
+        <div class="quiz-step">4. Последний штрих</div>
+    </div>
+
+    <div class="quiz-progress"{% if show_saved_questionnaire_prompt %} style="display: none;"{% endif %}>
+        <div class="quiz-progress__bar" id="quiz-progress-bar"></div>
+    </div>
+
+    <div class="form-note"{% if show_saved_questionnaire_prompt %} style="display: none;"{% endif %}>
+        <strong>*</strong> обязательные поля.
+    </div>
+
+    {% if not request.user.is_authenticated %}
+        <div class="form-help-card"{% if show_saved_questionnaire_prompt %} style="display: none;"{% endif %}>
+            Если укажете email, мы сможем сохранить результаты в кабинет.
+        </div>
+    {% endif %}
+
+    <form method="post" class="quiz-form" id="quiz-form"{% if show_saved_questionnaire_prompt %} style="display: none;"{% endif %}>
+        {% csrf_token %}
+
+        <section class="quiz-section is-active" data-step="0">
+            <div class="quiz-section__head">
+                <span class="quiz-section__badge">Шаг 1</span>
+                <h2>Давайте познакомимся</h2>
+                <p>Пара базовых деталей, и можно двигаться дальше.</p>
+            </div>
+            <div class="quiz-grid">
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="1"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.full_name.id_for_label }}" class="quiz-question__label">
+                            Как к вам обращаться?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.full_name }}</div>
+                        {% for error in form.full_name.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="2"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.age.id_for_label }}" class="quiz-question__label">
+                            Сколько вам лет?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.age }}</div>
+                        {% for error in form.age.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="3"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.city.id_for_label }}" class="quiz-question__label">
+                            В каком городе вы живёте?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.city }}</div>
+                        {% for error in form.city.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                {% if form.contact_email %}
+                    <div class="quiz-question">
+                        <div class="quiz-question__number" data-number="4"></div>
+                        <div class="quiz-question__body">
+                            <label for="{{ form.contact_email.id_for_label }}" class="quiz-question__label">
+                                Куда сохранить результаты?
+                            </label>
+                            <div class="quiz-question__field">{{ form.contact_email }}</div>
+                            {% if form.contact_email.help_text %}<small class="quiz-question__help">{{ form.contact_email.help_text }}</small>{% endif %}
+                            {% for error in form.contact_email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="quiz-section" data-step="1">
+            <div class="quiz-section__head">
+                <span class="quiz-section__badge">Шаг 2</span>
+                <h2>Как проходит ваш день?</h2>
+                <p>Так мы поймём, в каких условиях питомцу будет спокойнее и комфортнее.</p>
+            </div>
+            <div class="quiz-grid">
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="1"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.housing_type.id_for_label }}" class="quiz-question__label">
+                            Где будет жить питомец?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.housing_type }}</div>
+                        {% for error in form.housing_type.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="2"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.has_children.id_for_label }}" class="quiz-question__label">
+                            Есть ли у вас дети?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.has_children }}</div>
+                        {% for error in form.has_children.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="3"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.has_other_pets.id_for_label }}" class="quiz-question__label">
+                            Есть ли дома другие животные?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.has_other_pets }}</div>
+                        {% for error in form.has_other_pets.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="4"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.has_pet_experience.id_for_label }}" class="quiz-question__label">
+                            Был ли у вас раньше питомец?
+                        </label>
+                        <div class="quiz-question__field">{{ form.has_pet_experience }}</div>
+                        {% for error in form.has_pet_experience.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="5"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.activity_level.id_for_label }}" class="quiz-question__label">
+                            Какой у вас темп жизни?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.activity_level }}</div>
+                        {% for error in form.activity_level.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="6"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.time_at_home.id_for_label }}" class="quiz-question__label">
+                            Сколько времени вы обычно бываете дома?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.time_at_home }}</div>
+                        {% for error in form.time_at_home.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="quiz-section" data-step="2">
+            <div class="quiz-section__head">
+                <span class="quiz-section__badge">Шаг 3</span>
+                <h2>Кого вы ищете?</h2>
+                <p>На этом шаге можно оставить спокойные варианты «Неважно» и двигаться дальше.</p>
+            </div>
+            <div class="quiz-grid">
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="1"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.pet_preference.id_for_label }}" class="quiz-question__label">
+                            Кто вам ближе?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.pet_preference }}</div>
+                        {% for error in form.pet_preference.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="2"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.pet_age_preference.id_for_label }}" class="quiz-question__label">
+                            Какой возраст питомца вам ближе?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.pet_age_preference }}</div>
+                        {% for error in form.pet_age_preference.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="3"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.pet_gender_preference.id_for_label }}" class="quiz-question__label">
+                            Есть ли пожелания по полу?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.pet_gender_preference }}</div>
+                        {% for error in form.pet_gender_preference.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="4"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.adoption_goal.id_for_label }}" class="quiz-question__label">
+                            Зачем вы хотите взять питомца?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.adoption_goal }}</div>
+                        {% for error in form.adoption_goal.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="5"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.ready_for_medical_care.id_for_label }}" class="quiz-question__label">
+                            Готовы ли вы к особенному уходу?
+                            <span class="quiz-required">Обязательно</span>
+                        </label>
+                        <div class="quiz-question__field">{{ form.ready_for_medical_care }}</div>
+                        {% for error in form.ready_for_medical_care.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="quiz-section" data-step="3">
+            <div class="quiz-section__head">
+                <span class="quiz-section__badge">Шаг 4</span>
+                <h2>Немного от себя</h2>
+                <p>Если хотите, добавьте пару деталей, которые помогут подобрать питомца ещё точнее.</p>
+            </div>
+            <div class="quiz-grid">
+                <div class="quiz-question">
+                    <div class="quiz-question__number" data-number="1"></div>
+                    <div class="quiz-question__body">
+                        <label for="{{ form.additional_info.id_for_label }}" class="quiz-question__label">
+                            Есть ли что-то важное, что вы хотите рассказать?
+                        </label>
+                        <div class="quiz-question__field">{{ form.additional_info }}</div>
+                        {% for error in form.additional_info.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="quiz-actions">
+            <button type="button" class="btn quiz-nav-btn" id="quiz-prev" style="display: none;">Назад</button>
+            <button type="button" class="btn quiz-nav-btn" id="quiz-next">Далее</button>
+            <button type="submit" class="btn quiz-submit-btn" id="quiz-submit" style="display: none;">Показать результаты</button>
+        </div>
+        <p id="quiz-validation-message" class="quiz-validation-message" style="display: none;">
+            Пожалуйста, заполните все обязательные поля перед просмотром результатов.
+        </p>
+    </form>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('quiz-form');
+    if (!form) {
+      return;
+    }
+
+    const sections = Array.from(document.querySelectorAll('.quiz-section'));
+    const steps = Array.from(document.querySelectorAll('.quiz-step'));
+    const prevBtn = document.getElementById('quiz-prev');
+    const nextBtn = document.getElementById('quiz-next');
+    const submitBtn = document.getElementById('quiz-submit');
+    const progressBar = document.getElementById('quiz-progress-bar');
+    const validationMessage = document.getElementById('quiz-validation-message');
+    let currentStep = 0;
+
+    function validateStep(stepIndex) {
+      const section = sections[stepIndex];
+      if (!section) {
+        return true;
+      }
+
+      const fields = Array.from(section.querySelectorAll('input, select, textarea')).filter((field) => {
+        if (field.type === 'hidden') {
+          return false;
+        }
+        return field.required;
+      });
+
+      const invalidField = fields.find((field) => !field.checkValidity());
+      if (invalidField) {
+        validationMessage.style.display = 'block';
+        invalidField.reportValidity();
+        return false;
+      }
+
+      validationMessage.style.display = 'none';
+      return true;
+    }
+
+    function updateQuiz() {
+      sections.forEach((section, index) => {
+        section.classList.toggle('is-active', index === currentStep);
+      });
+
+      steps.forEach((step, index) => {
+        step.classList.toggle('is-active', index === currentStep);
+        step.classList.toggle('is-done', index < currentStep);
+      });
+
+      if (progressBar) {
+        const percent = ((currentStep + 1) / sections.length) * 100;
+        progressBar.style.width = percent + '%';
+      }
+
+      prevBtn.style.display = currentStep === 0 ? 'none' : 'inline-flex';
+      nextBtn.style.display = currentStep === sections.length - 1 ? 'none' : 'inline-flex';
+      submitBtn.style.display = currentStep === sections.length - 1 ? 'inline-flex' : 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    nextBtn.addEventListener('click', function () {
+      if (!validateStep(currentStep)) {
+        return;
+      }
+      if (currentStep < sections.length - 1) {
+        currentStep += 1;
+        updateQuiz();
+      }
+    });
+
+    prevBtn.addEventListener('click', function () {
+      if (currentStep > 0) {
+        currentStep -= 1;
+        validationMessage.style.display = 'none';
+        updateQuiz();
+      }
+    });
+
+    form.addEventListener('submit', function (event) {
+      if (!validateStep(currentStep) || !form.checkValidity()) {
+        event.preventDefault();
+        validationMessage.style.display = 'block';
+      }
+    });
+
+    updateQuiz();
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Результаты подбора{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>
+        Результаты подбора
+        <img src="{% static 'shelter/img/match.png' %}" alt="Результат" class="logotip">
+    </h1>
+
+    <p class="results-intro">
+        Для анкеты <strong>{{ questionnaire.full_name }}</strong> система подобрала наиболее подходящих питомцев.
+    </p>
+
+    {% if used_fallback %}
+        <p class="results-intro">
+            Подходящих совпадений с достаточным уровнем совместимости не найдено, поэтому показаны наиболее близкие варианты.
+        </p>
+    {% endif %}
+
+    <div class="results-summary">
+        <div class="summary-card">
+            <h3>Анкета обработана</h3>
+            <p>На основе введённых данных система рассчитала степень совместимости с питомцами приюта.</p>
+        </div>
+        <div class="summary-card">
+            <h3>Критерии подбора</h3>
+            <p>Тип животного, жильё, дети, другие животные, активность и наличие опыта.</p>
+        </div>
+    </div>
+
+    <div class="match-grid">
+        {% for item in matched_pets %}
+            <div class="match-card">
+                <div class="match-image">
+                    {% if item.pet.image %}
+                        <img src="{{ item.pet.image.url }}" alt="{{ item.pet.name }}">
+                    {% else %}
+                        <div class="image-placeholder">Нет фото</div>
+                    {% endif %}
+                </div>
+
+                <div class="match-content">
+                    <h3 class="match-name">{{ item.pet.name }}</h3>
+
+                    <div class="match-score-block">
+                        <div class="match-score-text">
+                            Совпадение: <strong>{{ item.score }} баллов</strong>
+                        </div>
+
+                        <div class="match-label
+                            {% if item.score >= 85 %}match-label-high
+                            {% elif item.score >= 65 %}match-label-good
+                            {% elif item.score >= 45 %}match-label-medium
+                            {% else %}match-label-low{% endif %}">
+                            {{ item.label }}
+                        </div>
+
+                        <div class="match-score-bar">
+                            <div class="match-score-fill" style="width: {% widthratio item.score 100 100 %}%"></div>
+                        </div>
+                    </div>
+
+                    <p class="match-meta">
+                        {% if item.pet.type == 'cat' %}
+                            {% if item.pet.gender == 'female' %}Кошка{% else %}Кот{% endif %}
+                        {% else %}
+                            {% if item.pet.gender == 'female' %}Собака{% else %}Пёс{% endif %}
+                        {% endif %},
+                        {{ item.pet.age_display }}
+                    </p>
+
+                    {% if item.pet.description %}
+                        <p class="match-description">
+                            <strong>История:</strong> {{ item.pet.description|truncatewords:18 }}
+                        </p>
+                    {% endif %}
+                </div>
+
+                <div class="match-reasons">
+                    {% for reason in item.reasons %}
+                        <div class="reason-item">✓ {{ reason }}</div>
+                    {% endfor %}
+                </div>
+
+                {% if item.warnings %}
+                    <div class="match-warnings">
+                        {% for warning in item.warnings %}
+                            <div class="warning-item">⚠ {{ warning }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <div class="match-footer">
+                    <a href="{% url 'adoption_application' item.pet.id %}" class="btn-pets">
+                        Подать заявку ❤️
+                    </a>
+                </div>
+            </div>
+        {% empty %}
+            <p>Подходящих питомцев пока не найдено.</p>
+        {% endfor %}
+    </div>
+</section>
+
+{{ questionnaire_prefill|json_script:"owner-questionnaire-prefill" }}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const dataNode = document.getElementById('owner-questionnaire-prefill');
+    if (!dataNode) {
+      return;
+    }
+
+    try {
+      sessionStorage.setItem('ownerQuestionnairePrefill', dataNode.textContent);
+    } catch (error) {
+      sessionStorage.removeItem('ownerQuestionnairePrefill');
+    }
+  });
+</script>
+{% endblock %}

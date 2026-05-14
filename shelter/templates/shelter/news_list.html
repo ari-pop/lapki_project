@@ -1,0 +1,27 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Новости - Приют «Лапки»{% endblock %}
+
+{% block content %}
+<div class="welcome-text">
+    <h1 >Новости приюта <img src="{% static 'shelter/img/news.png' %}" alt="Новости" class="logotip"></h1>
+    
+    <div class="news-grid">
+        {% for news in news_list %}
+            <div class="news-card">
+                {% if news.image %}
+                    <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
+                {% endif %}
+                <h2 class="news-title">
+                    <a href="{% url 'news_detail' news.pk %}">{{ news.title }}</a>
+                </h2>
+                <p class="news-summary">{{ news.summary|truncatewords:30 }}</p>
+                <p class="news-date"><small>{{ news.date }}</small></p>
+            </div>
+        {% empty %}
+            <p>Новостей пока нет.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

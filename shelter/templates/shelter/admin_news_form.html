@@ -1,0 +1,65 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'admin_news_list' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Черновики и готовые публикации редактируются здесь же, без отдельной админки.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right"></div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="admin-edit-form">
+        {% csrf_token %}
+        {% for field in form %}
+            {% if field.name == 'image' %}
+                <div class="admin-file-field">
+                    <label>{{ field.label }}</label>
+                    {% if news_item and news_item.image %}
+                        <div class="admin-current-file">
+                            <span>Сейчас:</span>
+                            <a href="{{ news_item.image.url }}" target="_blank" rel="noopener noreferrer">{{ news_item.image.name }}</a>
+                        </div>
+                    {% endif %}
+                    <div class="admin-file-row">
+                        <label for="{{ field.id_for_label }}" class="admin-file-label">Изменить фото:</label>
+                        <input type="file" name="{{ field.html_name }}" id="{{ field.id_for_label }}" accept="image/*">
+                    </div>
+                    {% if field.help_text %}
+                        <small>{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                    {% for error in field.errors %}
+                        <div class="field-error">{{ error }}</div>
+                    {% endfor %}
+                </p>
+            {% endif %}
+        {% endfor %}
+        <button type="submit" class="btn">{{ submit_label }}</button>
+    </form>
+
+    {% if news_item and news_item.image %}
+        <section class="help-block admin-preview-card">
+            <h2>Текущее изображение</h2>
+            <div class="admin-preview-frame">
+                <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="admin-preview-image">
+            </div>
+        </section>
+    {% endif %}
+</section>
+{% endblock %}

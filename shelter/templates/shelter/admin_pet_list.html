@@ -1,0 +1,61 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'dashboard' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Здесь можно быстро обновлять карточки питомцев и держать каталог в актуальном состоянии.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right">
+            <a href="{% url 'admin_pet_create' %}" class="btn admin-header-btn admin-header-btn-wide">Добавить вручную</a>
+        </div>
+    </div>
+
+    <div class="admin-links-grid admin-links-grid-tools">
+        <a href="{% url 'admin_pet_template_excel' %}" class="btn">Скачать шаблон</a>
+        <a href="{% url 'admin_pet_export_excel' %}" class="btn">Выгрузить в Excel</a>
+        <a href="{% url 'admin_pet_excel' %}" class="btn">Импорт из Excel</a>
+    </div>
+
+    <div class="admin-table-card admin-table-card-centered">
+        <div class="admin-record-grid">
+            {% for pet in pets %}
+                <article class="admin-record">
+                    <div class="admin-thumb-frame">
+                        {% if pet.image %}
+                            <img src="{{ pet.image.url }}" alt="{{ pet.name }}" class="admin-thumb-image">
+                        {% else %}
+                            <div class="admin-thumb-placeholder">Нет фото</div>
+                        {% endif %}
+                    </div>
+                    <div class="admin-record__main">
+                        <h2>{{ pet.name }}</h2>
+                        <p>{{ pet.get_type_display }} • {{ pet.get_gender_display }} • {{ pet.age_display }}</p>
+                        <div class="admin-record__chips">
+                            <span class="pet-tag">
+                                {% if pet.adopted %}
+                                    {% if pet.gender == 'female' %}Нашла дом{% else %}Нашёл дом{% endif %}
+                                {% else %}
+                                    Ищет дом
+                                {% endif %}
+                            </span>
+                            <span class="pet-tag">{{ pet.get_health_status_display }}</span>
+                            <span class="pet-tag">{{ pet.get_activity_level_display }}</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'admin_pet_edit' pet.pk %}" class="btn admin-mini-btn">Изменить</a>
+                </article>
+            {% empty %}
+                <p>Питомцев пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

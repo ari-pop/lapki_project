@@ -1,0 +1,178 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<section class="page-section dashboard-page">
+    <h1>
+        {% if role == 'admin' %}
+            Админ-кабинет
+        {% else %}
+            Личный кабинет
+        {% endif %}
+    </h1>
+
+    <p class="auth-intro">
+        Здравствуйте, {{ request.user.first_name|default:request.user.username }}.
+        {% if role == 'admin' %}
+            Здесь собраны рабочие разделы сайта в одном месте.
+        {% else %}
+            Здесь хранятся ваши заявки, анкеты и данные аккаунта.
+        {% endif %}
+    </p>
+
+    <section class="help-block account-settings">
+        <h2>Аккаунт</h2>
+        <article class="account-settings-card account-settings-card-wide account-settings-card-compact">
+            <form method="post" class="account-inline-form account-single-form">
+                {% csrf_token %}
+                <div class="account-settings-compact-grid">
+                    <p>
+                        {{ account_form.username.label_tag }}
+                        {{ account_form.username }}
+                        {% for error in account_form.username.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </p>
+                    <p>
+                        {{ account_form.email.label_tag }}
+                        {{ account_form.email }}
+                        {% for error in account_form.email.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </p>
+                    <p>
+                        {{ account_form.password1.label_tag }}
+                        {{ account_form.password1 }}
+                        {% for error in account_form.password1.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </p>
+                    <p>
+                        {{ account_form.password2.label_tag }}
+                        {{ account_form.password2 }}
+                        {% for error in account_form.password2.errors %}<div class="field-error">{{ error }}</div>{% endfor %}
+                    </p>
+                </div>
+                <p class="account-form-hint">Пароль можно изменить или оставить пустым.</p>
+                <button type="submit" class="btn">Сохранить</button>
+            </form>
+        </article>
+    </section>
+
+    {% if role == 'admin' %}
+        <div class="results-summary">
+            <div class="summary-card"><h3>Пользователи</h3><p>{{ users_count }}</p></div>
+            <div class="summary-card"><h3>Питомцы</h3><p>{{ pets_count }}</p></div>
+            <div class="summary-card"><h3>Заявки</h3><p>{{ all_applications_count }}</p></div>
+            <div class="summary-card"><h3>Анкеты</h3><p>{{ all_questionnaires_count }}</p></div>
+            <div class="summary-card"><h3>Новости</h3><p>{{ news_count }}</p></div>
+            <div class="summary-card"><h3>Сообщения</h3><p>{{ feedback_count }}</p></div>
+        </div>
+
+        <section class="help-block admin-section">
+            <h2>Управление разделами</h2>
+            <div class="admin-links-grid">
+                <a href="{% url 'admin_user_list' %}" class="btn">Пользователи</a>
+                <a href="{% url 'admin_pet_list' %}" class="btn">Карточки питомцев</a>
+                <a href="{% url 'admin_pet_excel' %}" class="btn">Импорт и выгрузка Excel</a>
+                <a href="{% url 'admin_pet_create' %}" class="btn">Добавить питомца</a>
+                <a href="{% url 'admin_news_list' %}" class="btn">Новости</a>
+                <a href="{% url 'admin_news_create' %}" class="btn">Добавить новость</a>
+                <a href="{% url 'admin_application_list' %}" class="btn">Заявки</a>
+                <a href="{% url 'admin_feedback_list' %}" class="btn">Сообщения</a>
+            </div>
+        </section>
+
+        <div class="admin-workspace-grid">
+            <section class="help-block admin-section">
+                <h2>Последние заявки</h2>
+                {% if recent_applications %}
+                    <div class="admin-dashboard-list">
+                        {% for application in recent_applications %}
+                            <div class="admin-dashboard-item">
+                                <div>
+                                    <strong>{{ application.full_name }}</strong>
+                                    <p>{{ application.pet.name }} | статус: {{ application.get_status_display }}</p>
+                                    <small>{{ application.created_at|date:"d.m.Y H:i" }}</small>
+                                </div>
+                                <a href="{% url 'admin_application_edit' application.pk %}" class="header-link">Открыть</a>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>Пока заявок нет.</p>
+                {% endif %}
+            </section>
+
+            <section class="help-block admin-section">
+                <h2>Последние анкеты</h2>
+                {% if recent_questionnaires %}
+                    <ul class="help-list admin-tight-list">
+                        {% for questionnaire in recent_questionnaires %}
+                            <li>{{ questionnaire.full_name }} — {{ questionnaire.city }}, {{ questionnaire.get_adoption_goal_display }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Анкет пока нет.</p>
+                {% endif %}
+            </section>
+        </div>
+    {% else %}
+        <div class="results-summary">
+            <div class="summary-card"><h3>Заявки</h3><p>{{ owner_applications_count }}</p></div>
+            <div class="summary-card"><h3>Анкеты</h3><p>{{ owner_questionnaires_count }}</p></div>
+        </div>
+
+        <section class="help-block account-history">
+            <h2>Мои заявки на усыновление</h2>
+            {% if owner_applications %}
+                <div class="account-card-grid">
+                    {% for application in owner_applications %}
+                        <article class="account-history-card">
+                            <h3>{{ application.pet.name }}</h3>
+                            <p><strong>Статус:</strong> {{ application.get_status_display }}</p>
+                            <p><strong>Дата:</strong> {{ application.created_at|date:"d.m.Y H:i" }}</p>
+                            <p><strong>ФИО:</strong> {{ application.full_name }}</p>
+                            <p><strong>Контакт:</strong> {{ application.email }}</p>
+                            <p><strong>Телефон:</strong> {{ application.phone }}</p>
+                            <p><strong>Возраст:</strong> {{ application.age }}</p>
+                            <p><strong>Город:</strong> {{ application.city }}</p>
+                            <p><strong>Тип жилья:</strong> {{ application.housing_type }}</p>
+                            <p><strong>Дети:</strong> {% if application.has_children %}Да{% else %}Нет{% endif %}</p>
+                            <p><strong>Другие животные:</strong> {% if application.has_other_pets %}Да{% else %}Нет{% endif %}</p>
+                            <p><strong>Опыт:</strong> {{ application.experience }}</p>
+                            <p><strong>Почему хотите взять:</strong> {{ application.why_adopt }}</p>
+                            <div class="account-note">
+                                <strong>Комментарий администратора:</strong>
+                                <p>{% if application.admin_comment %}{{ application.admin_comment }}{% else %}Пока комментария нет.{% endif %}</p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Пока у вас нет сохранённых заявок.</p>
+            {% endif %}
+        </section>
+
+        <section class="help-block account-history">
+            <h2>Мои анкеты подбора</h2>
+            {% if owner_questionnaires %}
+                <div class="account-card-grid">
+                    {% for questionnaire in owner_questionnaires %}
+                        <article class="account-history-card">
+                            <h3>Анкета от {{ questionnaire.created_at|date:"d.m.Y" }}</h3>
+                            <p><strong>Город:</strong> {{ questionnaire.city }}</p>
+                            <p><strong>Тип жилья:</strong> {{ questionnaire.get_housing_type_display }}</p>
+                            <p><strong>Есть дети:</strong> {% if questionnaire.has_children %}Да{% else %}Нет{% endif %}</p>
+                            <p><strong>Другие животные:</strong> {% if questionnaire.has_other_pets %}Да{% else %}Нет{% endif %}</p>
+                            <p><strong>Опыт:</strong> {% if questionnaire.experience_years %}Есть{% else %}Нет{% endif %}</p>
+                            <p><strong>Предпочтение:</strong> {{ questionnaire.get_pet_preference_display }}</p>
+                            <p><strong>Цель:</strong> {{ questionnaire.get_adoption_goal_display }}</p>
+                            <p><strong>Активность:</strong> {{ questionnaire.get_activity_level_display }}</p>
+                            <p><strong>Время дома:</strong> {{ questionnaire.get_time_at_home_display }}</p>
+                            {% if questionnaire.additional_info %}<p><strong>Дополнительно:</strong> {{ questionnaire.additional_info }}</p>{% endif %}
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>Пока анкет подбора нет.</p>
+            {% endif %}
+        </section>
+    {% endif %}
+</section>
+{% endblock %}

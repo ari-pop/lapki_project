@@ -1,0 +1,1 @@
+web: gunicorn lapki_project.wsgi

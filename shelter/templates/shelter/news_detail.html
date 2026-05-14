@@ -1,0 +1,16 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ news.title }} | Новости | Lapki Shelter{% endblock %}
+
+{% block content %}
+<article class="news-detail">
+    <h1>{{ news_item.title }}</h1>
+    <p><small>{{ news_item.date }}</small></p>
+    {% if news_item.image %}
+    <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
+    {% endif %}
+<div>{{ news_item.content|linebreaks }}</div>
+
+</article>
+<a href="{% url 'news' %}">← Назад к новостям</a>
+{% endblock %}

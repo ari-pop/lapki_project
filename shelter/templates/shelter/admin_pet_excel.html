@@ -1,0 +1,78 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'admin_pet_list' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Здесь можно скачать шаблон, посмотреть пример формата и затем загрузить или выгрузить Excel с питомцами.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right">
+            <a href="{% url 'admin_pet_export_excel' %}" class="btn admin-header-btn">Выгрузить</a>
+        </div>
+    </div>
+
+    <div class="admin-workspace-grid">
+        <section class="help-block admin-section">
+            <h2>Шаблон</h2>
+            <p>Скачайте готовый шаблон с одной примерной строкой. Его безопасно использовать для проверки формата.</p>
+            <div class="admin-links-grid admin-links-grid-tools admin-links-grid-tools-inline">
+                <a href="{% url 'admin_pet_template_excel' %}" class="btn">Скачать шаблон</a>
+                <a href="{% url 'admin_pet_export_excel' %}" class="btn">Скачать текущие данные</a>
+            </div>
+        </section>
+
+        <section class="help-block admin-section">
+            <h2>Загрузка</h2>
+            <p>Поддерживается только файл <code>.xlsx</code>. Если в строке есть <code>id</code>, обновится существующая карточка. Если <code>id</code> пустой, будет создан новый питомец.</p>
+            <form method="post" enctype="multipart/form-data" action="{% url 'admin_pet_import_excel' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn">Загрузить Excel</button>
+            </form>
+        </section>
+    </div>
+
+    <section class="help-block admin-section">
+        <h2>Как должен выглядеть файл</h2>
+        <p class="admin-template-note">Наведите на название колонки, чтобы увидеть подсказку по-русски.</p>
+        <div class="admin-table-card admin-table-card-centered">
+            <div class="admin-pet-template-preview">
+                <table class="admin-template-table">
+                    <thead>
+                        <tr>
+                            {% for column in template_columns %}
+                                <th title="{{ column.hint }}">
+                                    <span class="admin-template-header-hint">{{ column.header }}</span>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {% for column in template_columns %}
+                                <td>{{ column.example }}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section class="help-block admin-section">
+        <h2>Подсказки по значениям</h2>
+        <ul class="help-list admin-tight-list">
+            {% for title, hint in field_hints %}
+                <li><strong>{{ title }}:</strong> {{ hint }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+</section>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Контакты — Lapki Shelter{% endblock %}
+
+{% block content %}
+<section class="welcome-section">
+    <div class="welcome-text" style="text-align: center; width: 100%;">
+        <h1>
+            <img src="{% static 'shelter/img/paw.svg' %}" alt="Лапка" class="paw-icon" />
+            Контакты приюта «Лапки»
+            <img src="{% static 'shelter/img/paw.svg' %}" alt="Лапка" class="paw-icon" />
+        </h1>
+        <p>
+            Здесь каждый хвостик обретает надежду и любовь.<br>
+            Мы всегда рады общению и новым добрым рукам!
+        </p>
+
+        <p style="text-align: center;">
+            <strong>Адрес:</strong> ул. Добрая, 15, г. Таганрог<br>
+            <strong>Телефон:</strong> +7 (863) 400-00-00<br>
+            <strong>Email:</strong> info@lapki_shelter.ru<br>
+            <strong>Время работы:</strong> Пн–Вс 9:00–18:00
+        </p>
+
+        <a href="{% url 'pets' %}" class="btn">Посмотреть питомцев</a>
+    </div>
+</section>
+
+<section id="contact-form" style="max-width: 900px; margin: 3rem auto; background: #fffdf9; padding: 2rem; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 204, 128, 0.4);">
+    <h2 style="text-align: center; color: #d17b00;">
+        Свяжитесь с нами
+        <img src="{% static 'shelter/img/contact.png' %}" alt="Котик с карандашиком" class="logotip">
+    </h2>
+
+    <form method="post" action="{% url 'contacts' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Отправить</button>
+    </form>
+</section>
+
+<div style="text-align: center; margin-top: 2rem;">
+    <h3 style="color: #d17b00;">Мы в соцсетях:</h3>
+    <a href="http://vk.com/" target="_blank" class="btn" style="margin: 0.5rem;">ВКонтакте</a>
+    
+</div>
+
+<blockquote style="font-style: italic; margin-top: 3rem; text-align: center; color: #6b4f3b;">
+    «Помощь животным — это доброта в действии.»
+</blockquote>
+{% endblock %}

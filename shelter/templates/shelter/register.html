@@ -1,0 +1,22 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<section class="page-section auth-page">
+    <h1>Регистрация</h1>
+    <p class="auth-intro">
+        Создайте аккаунт будущего хозяина, чтобы сохранять анкеты подбора и отслеживать заявки на усыновление.
+    </p>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Создать аккаунт</button>
+    </form>
+
+    <p class="auth-secondary">
+        Уже зарегистрированы? <a href="{% url 'login' %}">Войти</a>
+    </p>
+</section>
+{% endblock %}

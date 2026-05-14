@@ -1,0 +1,209 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Питомцы | Lapki{% endblock %}
+
+{% block content %}
+<section class="page-section">
+  <h1>Наши питомцы<img src="{% static 'shelter/img/pets.png' %}" alt="Собачка и котик" class="logotip"></h1>
+
+  <p>
+    Сейчас в приюте «Лапки» живёт <strong>{{ cats_count }} кошек</strong> и
+    <strong>{{ dogs_count }} собак</strong>. Каждый из них мечтает обрести любящий дом.
+  </p>
+
+  <p>
+    Вы можете отфильтровать питомцев по типу и полу, а также отсортировать их по имени или возрасту.
+  </p>
+
+  <div class="filters">
+    <label for="type-filter">Тип:</label>
+    <select id="type-filter">
+      <option value="all">Все</option>
+      <option value="cat">Кошки</option>
+      <option value="dog">Собаки</option>
+    </select>
+
+    <label for="gender-filter">Пол:</label>
+    <select id="gender-filter">
+      <option value="all">Все</option>
+      <option value="male">Мальчик</option>
+      <option value="female">Девочка</option>
+    </select>
+
+    <label for="sort-filter">Сортировать по:</label>
+    <select id="sort-filter">
+      <option value="name">Имени</option>
+      <option value="age">Возрасту</option>
+    </select>
+
+    <button type="button" id="reset-filters" class="btn-reset-filters">
+      Сбросить фильтры
+    </button>
+  </div>
+
+  <div class="pets-grid">
+    {% for pet in pets %}
+      <div class="pet-card {% if pet.adopted %}adopted{% endif %}"
+           data-type="{{ pet.type }}"
+           data-gender="{{ pet.gender }}"
+           data-age="{{ pet.age_months }}"
+           data-name="{{ pet.name|lower }}">
+
+        <div class="pet-content">
+          <div class="pet-image">
+            {% if pet.image %}
+              <img src="{{ pet.image.url }}" alt="{{ pet.name }}">
+            {% else %}
+              <div class="image-placeholder">Нет фото</div>
+            {% endif %}
+          </div>
+
+          <div class="pet-info">
+            <h3>{{ pet.name }}</h3>
+
+            {% if pet.adopted %}
+              <p class="pet-status adopted-status">
+                Статус: {% if pet.gender == 'female' %}нашла дом{% else %}нашёл дом{% endif %}
+              </p>
+            {% else %}
+              <p class="pet-status available-status">Статус: ищет дом</p>
+            {% endif %}
+
+            <p>
+              {% if pet.type == 'cat' %}
+                {% if pet.gender == 'female' %}Кошка{% else %}Кот{% endif %}
+              {% else %}
+                {% if pet.gender == 'female' %}Собака{% else %}Пёс{% endif %}
+              {% endif %},
+              {{ pet.age_display }},
+              {% if pet.sterilized %}
+                {% if pet.gender == 'female' %}стерилизована{% else %}стерилизован{% endif %},
+              {% endif %}
+              {% if pet.vaccinated %}
+                {% if pet.gender == 'female' %}привита{% else %}привит{% endif %}.
+              {% endif %}
+            </p>
+
+            {% if pet.description %}
+              <p><strong>История:</strong> {{ pet.description|truncatewords:18 }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="pet-tags">
+          {% if pet.can_live_with_children %}
+            <span class="pet-tag">Для семьи с детьми</span>
+          {% endif %}
+
+          {% if pet.can_live_with_other_pets %}
+            <span class="pet-tag">Можно с животными</span>
+          {% endif %}
+
+          {% if pet.suitable_for_apartment %}
+            <span class="pet-tag">Для квартиры</span>
+          {% endif %}
+
+          {% if pet.requires_experience %}
+            <span class="pet-tag">Нужен опыт</span>
+          {% else %}
+            <span class="pet-tag">Подойдёт новичку</span>
+          {% endif %}
+
+          {% if pet.health_status == 'healthy' %}
+            <span class="pet-tag">Здоров</span>
+          {% else %}
+            <span class="pet-tag">Нужен уход</span>
+          {% endif %}
+
+          <span class="pet-tag">
+            {% if pet.activity_level == 'low' %}
+              Спокойный
+            {% elif pet.activity_level == 'medium' %}
+              Умеренно активный
+            {% else %}
+              Активный
+            {% endif %}
+          </span>
+        </div>
+
+        {% if pet.adopted %}
+          <div class="pet-footer">
+            <p class="adopted-note">
+              {% if pet.gender == 'female' %}Нашла дом ❤️{% else %}Нашёл дом ❤️{% endif %}
+            </p>
+          </div>
+        {% else %}
+          <a href="{% url 'adoption_application' pet.id %}" class="btn-pets">
+            Познакомиться ❤️
+          </a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const currentUrl = new URL(window.location.href);
+    if (currentUrl.searchParams.get('application_sent') === '1') {
+      sessionStorage.removeItem('ownerQuestionnairePrefill');
+      currentUrl.searchParams.delete('application_sent');
+      window.history.replaceState({}, document.title, currentUrl.pathname + currentUrl.search);
+    }
+
+    const typeFilter = document.getElementById('type-filter');
+    const genderFilter = document.getElementById('gender-filter');
+    const sortFilter = document.getElementById('sort-filter');
+    const resetButton = document.getElementById('reset-filters');
+    const cards = Array.from(document.querySelectorAll('.pet-card'));
+    const grid = document.querySelector('.pets-grid');
+
+    if (!typeFilter || !genderFilter || !sortFilter || !resetButton || !grid) {
+      return;
+    }
+
+    function filterAndSort() {
+      const type = typeFilter.value;
+      const gender = genderFilter.value;
+      const sort = sortFilter.value;
+
+      let visibleCards = cards.filter(card => {
+        const matchesType = type === 'all' || card.dataset.type === type;
+        const matchesGender = gender === 'all' || card.dataset.gender === gender;
+        return matchesType && matchesGender;
+      });
+
+      visibleCards.sort((a, b) => {
+        if (sort === 'age') {
+          return parseInt(a.dataset.age, 10) - parseInt(b.dataset.age, 10);
+        }
+        return a.dataset.name.localeCompare(b.dataset.name);
+      });
+
+      grid.innerHTML = '';
+
+      if (visibleCards.length === 0) {
+        grid.innerHTML = '<p>По вашему запросу питомцы не найдены.</p>';
+        return;
+      }
+
+      visibleCards.forEach(card => grid.appendChild(card));
+    }
+
+    function resetFilters() {
+      typeFilter.value = 'all';
+      genderFilter.value = 'all';
+      sortFilter.value = 'name';
+      filterAndSort();
+    }
+
+    typeFilter.addEventListener('change', filterAndSort);
+    genderFilter.addEventListener('change', filterAndSort);
+    sortFilter.addEventListener('change', filterAndSort);
+    resetButton.addEventListener('click', resetFilters);
+
+    filterAndSort();
+  });
+</script>
+{% endblock %}

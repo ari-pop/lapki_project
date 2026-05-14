@@ -1,0 +1,101 @@
+{% extends 'shelter/base.html' %}
+{% load static %}
+
+{% block title %}Заявка на усыновление{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <h1>
+        Заявка на знакомство с питомцем
+        <img src="{% static 'shelter/img/contact.png' %}" alt="Котик с карандашиком" class="logotip">
+    </h1>
+
+    <p class="results-intro">
+        Вы подаёте заявку на питомца: <strong>{{ pet.name }}</strong>
+    </p>
+
+    <div class="form-note">
+        <strong>*</strong> обязательные поля.
+    </div>
+
+    {% if not request.user.is_authenticated %}
+        <div class="form-help-card">
+            Если аккаунта пока нет, после отправки заявки мы сможем создать временный кабинет по указанной почте.
+        </div>
+    {% endif %}
+
+    {% if request.user.is_authenticated %}
+        <p id="prefill-note" class="form-help-card" style="display: none;">
+            Мы автоматически подставили данные из вашей анкеты подбора. При необходимости их можно изменить перед отправкой.
+        </p>
+    {% endif %}
+
+    <form method="post" id="adoption-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Отправить заявку</button>
+    </form>
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const storageKey = 'ownerQuestionnairePrefill';
+    const prefillNote = document.getElementById('prefill-note');
+    const form = document.getElementById('adoption-form');
+
+    if (!form) {
+      return;
+    }
+
+    const rawData = sessionStorage.getItem(storageKey);
+    if (!rawData) {
+      return;
+    }
+
+    let data;
+    try {
+      data = JSON.parse(rawData);
+    } catch (error) {
+      sessionStorage.removeItem(storageKey);
+      return;
+    }
+
+    const housingTypeMap = {
+      apartment: 'Квартира',
+      house: 'Частный дом',
+      rented: 'Съёмное жильё'
+    };
+
+    const fieldValues = {
+      full_name: data.full_name || '',
+      age: data.age || '',
+      city: data.city || '',
+      housing_type: housingTypeMap[data.housing_type] || '',
+      experience: data.experience_years >= 1 ? 'Есть опыт содержания животных.' : 'Опыта содержания животных раньше не было.'
+    };
+
+    Object.entries(fieldValues).forEach(([name, value]) => {
+      const field = form.elements.namedItem(name);
+      if (field && !field.value) {
+        field.value = value;
+      }
+    });
+
+    const checkboxValues = {
+      has_children: Boolean(data.has_children),
+      has_other_pets: Boolean(data.has_other_pets)
+    };
+
+    Object.entries(checkboxValues).forEach(([name, value]) => {
+      const field = form.elements.namedItem(name);
+      if (field && !field.checked) {
+        field.checked = value;
+      }
+    });
+
+    if (prefillNote) {
+      prefillNote.style.display = 'block';
+    }
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'dashboard' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Публикации можно редактировать в том же визуальном стиле, что и весь сайт.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right">
+            <a href="{% url 'admin_news_create' %}" class="btn admin-header-btn">Добавить</a>
+        </div>
+    </div>
+
+    <div class="admin-table-card admin-table-card-centered">
+        <div class="admin-record-grid">
+            {% for item in news_items %}
+                <article class="admin-record">
+                    <div class="admin-thumb-frame">
+                        {% if item.image %}
+                            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="admin-thumb-image">
+                        {% else %}
+                            <div class="admin-thumb-placeholder">Нет фото</div>
+                        {% endif %}
+                    </div>
+                    <div class="admin-record__main">
+                        <h2>{{ item.title }}</h2>
+                        <p>{{ item.date|date:"d.m.Y" }}</p>
+                        <p>{{ item.summary|truncatewords:18 }}</p>
+                    </div>
+                    <a href="{% url 'admin_news_edit' item.pk %}" class="btn admin-mini-btn">Изменить</a>
+                </article>
+            {% empty %}
+                <p>Новостей пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

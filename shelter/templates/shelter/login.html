@@ -1,0 +1,22 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<section class="page-section auth-page">
+    <h1>Вход</h1>
+    <p class="auth-intro">
+        Войдите в аккаунт, чтобы продолжить работу с заявками, анкетами и личным кабинетом.
+    </p>
+
+    <form method="post" class="auth-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Войти</button>
+    </form>
+
+    <p class="auth-secondary">
+        Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+    </p>
+</section>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}О приюте | Lapki{% endblock %}
+
+{% block content %}
+{% load static %}
+  <section class="page-section">
+    <h1>О приюте «Лапки»
+      <img src="{% static 'shelter/img/about.png' %}" alt="Домик с сердечком" class="logotip">
+    </h1>
+
+    <p>
+      Приют «Лапки» был основан в 2015 году группой энтузиастов, неравнодушных к судьбе бездомных животных.
+      С самого начала наша цель — спасение, лечение и поиск нового дома для кошек и собак, попавших в беду.
+    </p>
+
+    <p>
+      За годы работы нам удалось пристроить в заботливые руки более 1200 питомцев. 
+      Мы сотрудничаем с ветеринарами, волонтёрами и просто добрыми людьми, которые помогают нам делать этот мир лучше.
+    </p>
+
+    <p>
+      В нашем приюте работают профессиональные кинологи, зоопсихологи и ветеринарные врачи, благодаря которым каждое животное получает не только уход, но и шанс на счастливую жизнь.
+    </p>
+
+    <p>
+      Мы также проводим образовательные мероприятия и участвуем в программах по повышению культуры ответственного отношения к животным.
+    </p>
+
+    <p style="text-align: center; margin-top: 2rem;">
+      <strong>Присоединяйтесь к нам — вместе мы можем спасти больше жизней!</strong>
+    </p>
+
+    <hr>
+
+    <h2>Наша команда</h2>
+    <div class="staff-grid">
+      <div class="staff-card">
+        <img src="{% static 'shelter/img/staff1.jpg' %}" alt="Анна Дмитриевна">
+        <h3>Анна Дмитриевна</h3>
+        <p>Кинолог</p>
+      </div>
+      <div class="staff-card">
+        <img src="{% static 'shelter/img/staff2.jpg' %}" alt="Арина Алексеевна">
+        <h3>Арина Алексеевна</h3>
+        <p>Ветеринар</p>
+      </div>
+      <div class="staff-card">
+        <img src="{% static 'shelter/img/staff3.jpg' %}" alt="Дарья Алексеевна">
+        <h3>Дарья Алексеевна</h3>
+        <p>Психолог-реабилитолог</p>
+      </div>
+      <div class="staff-card">
+        <img src="{% static 'shelter/img/staff4.jpg' %}" alt="Максим Евгеньевич">
+        <h3>Максим Евгеньевич</h3>
+        <p>Специалист по уходу за животными</p>
+      </div>
+      <div class="staff-card">
+        <img src="{% static 'shelter/img/staff5.jpg' %}" alt="Ольга Николаевна">
+        <h3>Ольга Николаевна</h3>
+        <p>Координатор по приёмам и усыновлению</p>
+      </div>
+    </div>
+
+    <hr>
+
+    <h2>Наш приют</h2>
+      <div class="shelter-gallery">
+        <div class="carousel">
+          <div class="carousel-track">
+            <img src="{% static 'shelter/img/shelter1.jpg' %}" alt="Территория приюта">
+            <img src="{% static 'shelter/img/shelter2.jpg' %}" alt="Вольеры">
+            <img src="{% static 'shelter/img/shelter3.jpg' %}" alt="Животные">
+            <img src="{% static 'shelter/img/shelter4.jpg' %}" alt="Животные">
+            <img src="{% static 'shelter/img/shelter5.jpg' %}" alt="Животные">
+            <img src="{% static 'shelter/img/shelter6.jpg' %}" alt="Животные">
+            <img src="{% static 'shelter/img/shelter7.jpg' %}" alt="Животные">
+            <img src="{% static 'shelter/img/shelter8.jpg' %}" alt="Животные">
+            <img src="{% static 'shelter/img/shelter9.jpg' %}" alt="Животные">
+          </div>
+          <button class="carousel-button prev">&#10094;</button>
+          <button class="carousel-button next">&#10095;</button>
+        </div>
+      </div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const track = document.querySelector('.carousel-track');
+    const slides = Array.from(track.children);
+    const prevButton = document.querySelector('.carousel-button.prev');
+    const nextButton = document.querySelector('.carousel-button.next');
+
+    let currentIndex = 0;
+
+    function updateSlidePosition() {
+      const slideWidth = slides[0].getBoundingClientRect().width;
+      track.style.transform = `translateX(-${slideWidth * currentIndex}px)`;
+    }
+
+    prevButton.addEventListener('click', () => {
+      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+      updateSlidePosition();
+    });
+
+    nextButton.addEventListener('click', () => {
+      currentIndex = (currentIndex + 1) % slides.length;
+      updateSlidePosition();
+    });
+
+    // Автопрокрутка
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % slides.length;
+      updateSlidePosition();
+    }, 4000); // каждые 4 секунды
+
+    // Обновляем размер при изменении окна
+    window.addEventListener('resize', updateSlidePosition);
+
+    updateSlidePosition(); // инициализация
+  });
+</script>
+
+  </section>
+{% endblock %}

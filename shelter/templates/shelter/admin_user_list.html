@@ -1,0 +1,40 @@
+{% extends 'shelter/base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<section class="page-section admin-page-section">
+    <div class="admin-page-header admin-page-header-balanced">
+        <div class="admin-page-header__side admin-page-header__side-left">
+            <a href="{% url 'dashboard' %}" class="header-link admin-header-btn">Назад</a>
+        </div>
+        <div class="admin-page-header__center">
+            <p class="admin-badge">Админ-панель</p>
+            <h1>{{ page_title }}</h1>
+            <p class="results-intro">Здесь собраны пользователи сайта, как в административной панели, но в более удобном виде.</p>
+        </div>
+        <div class="admin-page-header__side admin-page-header__side-right">
+            <a href="/admin/auth/user/" class="btn admin-header-btn">Django admin</a>
+        </div>
+    </div>
+
+    <div class="admin-table-card admin-table-card-centered">
+        <div class="admin-record-grid">
+            {% for user in users %}
+                <article class="admin-record admin-record-no-thumb">
+                    <div class="admin-record__main">
+                        <h2>{{ user.username }}</h2>
+                        <p><strong>Email:</strong> {{ user.email|default:"не указан" }}</p>
+                        <p><strong>Имя:</strong> {{ user.first_name|default:"—" }}</p>
+                        <p><strong>Роль:</strong> {% if user.is_superuser %}Суперпользователь{% elif user.is_staff %}Сотрудник{% else %}Пользователь{% endif %}</p>
+                        <p><strong>Дата регистрации:</strong> {{ user.date_joined|date:"d.m.Y H:i" }}</p>
+                        <p><strong>Последний вход:</strong> {% if user.last_login %}{{ user.last_login|date:"d.m.Y H:i" }}{% else %}ещё не входил{% endif %}</p>
+                    </div>
+                </article>
+            {% empty %}
+                <p>Пользователей пока нет.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}
