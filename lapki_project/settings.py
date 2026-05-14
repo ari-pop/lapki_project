@@ -154,3 +154,4 @@ if not DEBUG:
 
 if os.environ.get('DJANGO_USE_WHITENOISE', 'False').lower() == 'true':
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
