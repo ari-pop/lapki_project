@@ -115,7 +115,6 @@
     {% else %}
         <div class="results-summary">
             <div class="summary-card"><h3>Заявки</h3><p>{{ owner_applications_count }}</p></div>
-            <div class="summary-card"><h3>Анкеты</h3><p>{{ owner_questionnaires_count }}</p></div>
         </div>
 
         <section class="help-block account-history">
@@ -149,30 +148,6 @@
             {% endif %}
         </section>
 
-        <section class="help-block account-history">
-            <h2>Мои анкеты подбора</h2>
-            {% if owner_questionnaires %}
-                <div class="account-card-grid">
-                    {% for questionnaire in owner_questionnaires %}
-                        <article class="account-history-card">
-                            <h3>Анкета от {{ questionnaire.created_at|date:"d.m.Y" }}</h3>
-                            <p><strong>Город:</strong> {{ questionnaire.city }}</p>
-                            <p><strong>Тип жилья:</strong> {{ questionnaire.get_housing_type_display }}</p>
-                            <p><strong>Есть дети:</strong> {% if questionnaire.has_children %}Да{% else %}Нет{% endif %}</p>
-                            <p><strong>Другие животные:</strong> {% if questionnaire.has_other_pets %}Да{% else %}Нет{% endif %}</p>
-                            <p><strong>Опыт:</strong> {% if questionnaire.experience_years %}Есть{% else %}Нет{% endif %}</p>
-                            <p><strong>Предпочтение:</strong> {{ questionnaire.get_pet_preference_display }}</p>
-                            <p><strong>Цель:</strong> {{ questionnaire.get_adoption_goal_display }}</p>
-                            <p><strong>Активность:</strong> {{ questionnaire.get_activity_level_display }}</p>
-                            <p><strong>Время дома:</strong> {{ questionnaire.get_time_at_home_display }}</p>
-                            {% if questionnaire.additional_info %}<p><strong>Дополнительно:</strong> {{ questionnaire.additional_info }}</p>{% endif %}
-                        </article>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p>Пока анкет подбора нет.</p>
-            {% endif %}
-        </section>
     {% endif %}
 </section>
 {% endblock %}
