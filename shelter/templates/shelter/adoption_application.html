@@ -94,6 +94,17 @@
     });
 
     if (prefillNote) {
+      if (!prefillNote.querySelector('.prefill-note__close')) {
+        const closeButton = document.createElement('button');
+        closeButton.type = 'button';
+        closeButton.className = 'prefill-note__close';
+        closeButton.setAttribute('aria-label', 'Закрыть подсказку');
+        closeButton.innerHTML = '&times;';
+        closeButton.addEventListener('click', function () {
+          prefillNote.style.display = 'none';
+        });
+        prefillNote.prepend(closeButton);
+      }
       prefillNote.style.display = 'block';
     }
   });
