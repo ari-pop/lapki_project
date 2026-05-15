@@ -578,6 +578,7 @@ def adoption_application(request, pet_id):
         if form.is_valid():
             application = form.save(commit=False)
             application.pet = pet
+            feedback_message = 'Заявка успешно отправлена. Мы свяжемся с будущим хозяином по указанной электронной почте.'
             if request.user.is_authenticated:
                 application.user = request.user
             else:
@@ -586,10 +587,7 @@ def adoption_application(request, pet_id):
                     form.cleaned_data.get('full_name', ''),
                 )
                 if already_exists:
-                    messages.warning(
-                        request,
-                        'Аккаунт с такой почтой уже существует. Заявка отправлена, но чтобы видеть её в кабинете, войдите под своим логином.',
-                    )
+                    feedback_message = 'Заявка отправлена. Чтобы видеть её в кабинете, войдите под своим логином.'
                 else:
                     application.user = temp_user
                     login(request, temp_user)
@@ -599,20 +597,11 @@ def adoption_application(request, pet_id):
                         temp_password,
                     )
                     if email_sent:
-                        messages.success(
-                            request,
-                            'Мы создали временный аккаунт и отправили логин с паролем на указанную почту.',
-                        )
+                        feedback_message = 'Заявка отправлена. Мы создали временный аккаунт и отправили логин с паролем на указанную почту.'
                     else:
-                        messages.success(
-                            request,
-                            f'Мы создали временный аккаунт. Логин: {temp_user.username}. Пароль: {temp_password}. Их можно изменить позже в кабинете.',
-                        )
+                        feedback_message = f'Заявка отправлена. Мы создали временный аккаунт. Логин: {temp_user.username}. Пароль: {temp_password}. Их можно изменить позже в кабинете.'
             application.save()
-            messages.success(
-                request,
-                'Заявка успешно отправлена. Мы свяжемся с будущим хозяином по указанной электронной почте.',
-            )
+            messages.success(request, feedback_message)
             return redirect(f"{reverse('pets')}?application_sent=1")
     else:
         initial = {}
