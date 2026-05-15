@@ -133,6 +133,8 @@ class OwnerQuestionnaireForm(StyledModelForm):
         self.fields['pet_gender_preference'].help_text = ''
         self.fields['additional_info'].required = False
         self.fields['additional_info'].help_text = ''
+        self.fields['contact_email'].label = 'Email'
+        self.fields['contact_email'].help_text = 'Необязательно. По этой почте можно сохранить результаты в кабинете.'
 
         radio_fields = [
             'housing_type',
@@ -395,6 +397,13 @@ class NewsAdminForm(StyledModelForm):
 
 
 class AdoptionApplicationAdminForm(StyledModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['why_adopt'].required = False
+        self.fields['why_adopt'].help_text = ''
+        if self.fields['why_adopt'].label.endswith(' *'):
+            self.fields['why_adopt'].label = self.fields['why_adopt'].label[:-2]
+
     class Meta:
         model = AdoptionApplication
         fields = [
