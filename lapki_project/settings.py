@@ -131,14 +131,16 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 EMAIL_BACKEND = os.environ.get(
     'DJANGO_EMAIL_BACKEND',
-    'django.core.mail.backends.dummy.EmailBackend',
+    'django.core.mail.backends.smtp.EmailBackend',
 )
-EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST', '')
+
+EMAIL_HOST = os.environ.get('DJANGO_EMAIL_HOST', 'smtp.yandex.ru')
 EMAIL_PORT = int(os.environ.get('DJANGO_EMAIL_PORT', '587'))
 EMAIL_HOST_USER = os.environ.get('DJANGO_EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('DJANGO_EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = os.environ.get('DJANGO_EMAIL_USE_TLS', 'True').lower() == 'true'
 EMAIL_USE_SSL = os.environ.get('DJANGO_EMAIL_USE_SSL', 'False').lower() == 'true'
+
 DEFAULT_FROM_EMAIL = os.environ.get(
     'DJANGO_DEFAULT_FROM_EMAIL',
     EMAIL_HOST_USER or 'no-reply@lapki.local',
@@ -152,6 +154,5 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
     SECURE_REFERRER_POLICY = 'same-origin'
 
-if os.environ.get('DJANGO_USE_WHITENOISE', 'False').lower() == 'true':
-    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
 
