@@ -88,7 +88,22 @@ def build_temporary_username(email):
 def create_temporary_account(email, full_name=''):
     existing_user = User.objects.filter(email__iexact=email).first()
     if existing_user:
-        return existing_user, None, False, True
+        if existing_user.is_superuser or existing_user.is_staff:
+            return existing_user, None, 'protected'
+
+        password = secrets.token_urlsafe(8)
+        first_name = full_name.strip().split()[0] if full_name.strip() else ''
+        fields_to_update = ['password']
+
+        if first_name and not existing_user.first_name:
+            existing_user.first_name = first_name
+            fields_to_update.append('first_name')
+
+        existing_user.set_password(password)
+        existing_user.save(update_fields=fields_to_update)
+        ensure_user_profile(existing_user)
+        sync_user_related_records(existing_user)
+        return existing_user, password, 'refreshed'
 
     password = secrets.token_urlsafe(8)
     username = build_temporary_username(email)
@@ -102,7 +117,7 @@ def create_temporary_account(email, full_name=''):
     )
     ensure_user_profile(user)
     sync_user_related_records(user)
-    return user, password, True, False
+    return user, password, 'created'
 
 
 def temporary_account_email_is_configured():
@@ -123,18 +138,23 @@ def temporary_account_email_is_configured():
     return bool(getattr(settings, 'DEFAULT_FROM_EMAIL', ''))
 
 
-def send_temporary_account_email(user, email, password):
+def send_temporary_account_email(user, email, password, created=True):
     if not temporary_account_email_is_configured():
         return False
 
-    subject = 'Временный аккаунт на сайте приюта "Лапки"'
+    subject = 'Данные для входа на сайте приюта "Лапки"'
+    intro = (
+        'Для вас создан временный аккаунт на сайте приюта "Лапки".'
+        if created
+        else 'Мы подготовили обновлённые данные для входа на сайте приюта "Лапки".'
+    )
     message = (
         f'Здравствуйте!\n\n'
-        f'Для вас создан временный аккаунт на сайте приюта "Лапки".\n\n'
+        f'{intro}\n\n'
         f'Логин: {user.username}\n'
         f'Пароль: {password}\n\n'
         f'После входа вы сможете изменить данные в личном кабинете и посмотреть свои анкеты и заявки.\n\n'
-        f'Если вы не запрашивали создание аккаунта, просто проигнорируйте это письмо.'
+        f'Если вы не запрашивали это письмо, просто проигнорируйте его.'
     )
 
     try:
@@ -497,33 +517,47 @@ def owner_questionnaire(request):
             else:
                 contact_email = form.cleaned_data.get('contact_email')
                 if contact_email:
-                    temp_user, temp_password, created, already_exists = create_temporary_account(
+                    temp_user, temp_password, account_state = create_temporary_account(
                         contact_email,
                         form.cleaned_data.get('full_name', ''),
                     )
-                    if already_exists:
+                    if account_state == 'protected':
                         messages.warning(
                             request,
-                            'Аккаунт с такой почтой уже существует. Анкета сохранена, но чтобы видеть её в кабинете, войдите под своим логином.',
+                            'Для этой почты уже существует защищённый аккаунт. Анкета сохранена, но чтобы видеть её в кабинете, войдите под своим логином.',
                         )
                     else:
                         questionnaire.user = temp_user
-                        login(request, temp_user)
                         email_sent = send_temporary_account_email(
                             temp_user,
                             contact_email,
                             temp_password,
+                            created=account_state == 'created',
                         )
+                        if account_state == 'created':
+                            login(request, temp_user)
                         if email_sent:
-                            messages.success(
-                                request,
-                                'Мы создали временный аккаунт и отправили логин с паролем на указанную почту.',
-                            )
+                            if account_state == 'created':
+                                messages.success(
+                                    request,
+                                    'Мы создали временный аккаунт и отправили логин с паролем на указанную почту.',
+                                )
+                            else:
+                                messages.success(
+                                    request,
+                                    'Мы нашли ваш аккаунт и отправили обновлённые данные для входа на указанную почту.',
+                                )
                         else:
-                            messages.success(
-                                request,
-                                f'Мы создали временный аккаунт. Логин: {temp_user.username}. Пароль: {temp_password}. Их можно изменить позже в кабинете.',
-                            )
+                            if account_state == 'created':
+                                messages.success(
+                                    request,
+                                    f'Мы создали временный аккаунт. Логин: {temp_user.username}. Пароль: {temp_password}. Их можно изменить позже в кабинете.',
+                                )
+                            else:
+                                messages.success(
+                                    request,
+                                    f'Мы нашли ваш аккаунт. Логин: {temp_user.username}. Новый пароль: {temp_password}. Их можно изменить позже в кабинете.',
+                                )
                 else:
                     messages.info(
                         request,
@@ -582,24 +616,32 @@ def adoption_application(request, pet_id):
             if request.user.is_authenticated:
                 application.user = request.user
             else:
-                temp_user, temp_password, created, already_exists = create_temporary_account(
+                temp_user, temp_password, account_state = create_temporary_account(
                     form.cleaned_data['email'],
                     form.cleaned_data.get('full_name', ''),
                 )
-                if already_exists:
-                    feedback_message = 'Заявка отправлена. Чтобы видеть её в кабинете, войдите под своим логином.'
+                if account_state == 'protected':
+                    feedback_message = 'Заявка отправлена. Для этой почты уже существует защищённый аккаунт. Чтобы видеть заявку в кабинете, войдите под своим логином.'
                 else:
                     application.user = temp_user
-                    login(request, temp_user)
                     email_sent = send_temporary_account_email(
                         temp_user,
                         form.cleaned_data['email'],
                         temp_password,
+                        created=account_state == 'created',
                     )
+                    if account_state == 'created':
+                        login(request, temp_user)
                     if email_sent:
-                        feedback_message = 'Заявка отправлена. Мы создали временный аккаунт и отправили логин с паролем на указанную почту.'
+                        if account_state == 'created':
+                            feedback_message = 'Заявка отправлена. Мы создали временный аккаунт и отправили логин с паролем на указанную почту.'
+                        else:
+                            feedback_message = 'Заявка отправлена. Мы нашли ваш аккаунт и отправили обновлённые данные для входа на указанную почту.'
                     else:
-                        feedback_message = f'Заявка отправлена. Мы создали временный аккаунт. Логин: {temp_user.username}. Пароль: {temp_password}. Их можно изменить позже в кабинете.'
+                        if account_state == 'created':
+                            feedback_message = f'Заявка отправлена. Мы создали временный аккаунт. Логин: {temp_user.username}. Пароль: {temp_password}. Их можно изменить позже в кабинете.'
+                        else:
+                            feedback_message = f'Заявка отправлена. Мы нашли ваш аккаунт. Логин: {temp_user.username}. Новый пароль: {temp_password}. Их можно изменить позже в кабинете.'
             application.save()
             messages.success(request, feedback_message)
             return redirect(f"{reverse('pets')}?application_sent=1")
