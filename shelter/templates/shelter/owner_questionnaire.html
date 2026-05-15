@@ -302,7 +302,15 @@
     const submitBtn = document.getElementById('quiz-submit');
     const progressBar = document.getElementById('quiz-progress-bar');
     const validationMessage = document.getElementById('quiz-validation-message');
+    const contactEmailField = form.elements.namedItem('contact_email');
     let currentStep = 0;
+
+    if (contactEmailField) {
+      const emailLabel = form.querySelector('label[for="' + contactEmailField.id + '"]');
+      if (emailLabel) {
+        emailLabel.textContent = 'Email';
+      }
+    }
 
     function validateStep(stepIndex) {
       const section = sections[stepIndex];
