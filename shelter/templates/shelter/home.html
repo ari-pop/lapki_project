@@ -8,8 +8,10 @@
     <div class="welcome-text">
         <h1>Добро пожаловать в приют «Лапки» <img src="{% static 'shelter/img/paw.svg' %}" alt="Лапка" class="paw-icon" /></h1>
         <p>Здесь каждый хвостик обретает надежду и любовь. Мы заботимся о наших питомцах и ищем для них самые добрые руки.</p>
-        <a href="{% url 'pets' %}" class="btn">Посмотреть питомцев</a>
-        <a href="{% url 'owner_questionnaire' %}" class="btn" style="margin-left: 10px;">Подобрать питомца</a>
+        <div class="welcome-actions">
+            <a href="{% url 'pets' %}" class="btn">Посмотреть питомцев</a>
+            <a href="{% url 'owner_questionnaire' %}" class="btn">Подобрать питомца</a>
+        </div>
     </div>
 </div>
 
