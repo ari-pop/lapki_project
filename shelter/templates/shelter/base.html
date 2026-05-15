@@ -44,6 +44,14 @@
             <a href="{% url 'help' %}" class="{% if request.resolver_match.url_name == 'help' %}active{% endif %}">
                 <i class="fas fa-hands-helping"></i> Помощь
             </a>
+            {% if request.user.is_authenticated %}
+                <form method="post" action="{% url 'logout' %}" class="logout-form logout-form-mobile">
+                    {% csrf_token %}
+                    <button type="submit" class="mobile-nav-action">
+                        <i class="fas fa-sign-out-alt"></i> Р’С‹Р№С‚Рё
+                    </button>
+                </form>
+            {% endif %}
         </nav>
 
         <div class="header-actions">
@@ -71,9 +79,12 @@
 
 <main>
     {% if messages %}
-        <div class="messages">
+        <div class="messages" aria-live="polite">
             {% for message in messages %}
-                <div class="alert">{{ message }}</div>
+                <div class="alert alert-{{ message.tags|default:'info' }}" data-flash-message>
+                    <div class="alert__text">{{ message }}</div>
+                    <button type="button" class="alert__close" aria-label="Закрыть уведомление">&times;</button>
+                </div>
             {% endfor %}
         </div>
     {% endif %}
@@ -142,6 +153,26 @@
         });
       });
     }
+
+    document.querySelectorAll('[data-flash-message]').forEach(function (messageEl) {
+      const closeButton = messageEl.querySelector('.alert__close');
+
+      function hideMessage() {
+        if (messageEl.classList.contains('is-hiding')) {
+          return;
+        }
+        messageEl.classList.add('is-hiding');
+        window.setTimeout(function () {
+          messageEl.remove();
+        }, 220);
+      }
+
+      if (closeButton) {
+        closeButton.addEventListener('click', hideMessage);
+      }
+
+      window.setTimeout(hideMessage, 5200);
+    });
   })();
 </script>
 </body>
